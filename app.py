@@ -86,6 +86,9 @@ def handle_update(image, old_uuid):
     return message  # Returns the error message if update is not successful.
 
 def search_and_display(image):
+    if image is None:
+        return "No image provided. Please upload an image.", [], ""
+    
     found, message, s3_urls, old_uuid = search_for_similar_image(image)
     if found:
         return message, s3_urls, old_uuid

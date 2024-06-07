@@ -1,9 +1,5 @@
-os
-uuid
 boto3
 pinecone-client
 gradio
 face-recognition
 Pillow
-io
-datetime

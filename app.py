@@ -96,6 +96,14 @@ def search_and_display(image):
         # Handle cases where no match is found or a new UUID needs to be created
         return message, [], ""
     
+def handle_addition(image, old_uuid):
+    message, s3_url, _ = handle_image_database_and_s3(os.environ.get("AWS_BUCKET"), image, old_uuid)
+    return f"Image added to child's file. File ID: {old_uuid}."
+
+def handle_new(image):
+    message, s3_url, new_uuid = handle_image_database_and_s3(os.environ.get("AWS_BUCKET"), image)
+    return f"New record created for child. File ID: {new_uuid}."
+    
 with gr.Blocks() as app:
     with gr.Row():
         image_input = gr.Image(type="pil", label="Upload Image")
@@ -108,18 +116,6 @@ with gr.Blocks() as app:
     with gr.Row():
         add_button = gr.Button("Add to Existing Child")
         new_button = gr.Button("Create New ID")
-        
-    def search_and_display(image):
-        found, message, s3_urls, old_uuid = search_for_similar_image(image)
-        return message, s3_urls, old_uuid
-
-    def handle_addition(image, old_uuid):
-        message, s3_url, _ = handle_image_database_and_s3(os.environ.get("AWS_BUCKET"), image, old_uuid)
-        return f"Image added to child's file. File ID: {old_uuid}."
-
-    def handle_new(image):
-        message, s3_url, new_uuid = handle_image_database_and_s3(os.environ.get("AWS_BUCKET"), image)
-        return f"New record created for child. File ID: {new_uuid}."
 
     submit_button.click(
         fn=search_and_display,

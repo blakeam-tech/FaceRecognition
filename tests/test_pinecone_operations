@@ -1,0 +1,26 @@
+# test_pinecone_operations.py
+import pytest
+from unittest.mock import patch, MagicMock
+from PIL import Image
+from face_recognition_core import handle_image_database_and_s3, search_for_similar_image
+
+def test_handle_image_database_and_s3():
+    """Ensure that image handling and database operations are performed correctly."""
+    with patch('face_recognition_core.upload_image_to_s3', return_value="images/test_image.jpg"), \
+         patch('face_recognition_core.face_encodings', return_value=[list(range(128))]), \
+         patch('face_recognition_core.load_image_file', return_value="image data"), \
+         patch('face_recognition_core.os.remove') as mock_remove, \
+         patch('face_recognition_core.index.upsert') as mock_upsert:
+        result = handle_image_database_and_s3(os.getenv('AWS_BUCKET_NAME'), Image.new("RGB", (100, 100)))
+        assert result[0] == "Image processed successfully."
+
+def test_search_for_similar_image():
+    """Test the functionality to search for a similar image."""
+    with patch('face_recognition_core.index.query', return_value={"matches": [{"id": "12345", "score": 0.96}]}), \
+         patch('face_recognition_core.index.fetch', return_value={"vectors": {"12345": {"metadata": {"s3_urls": ["http://example.com"]}}}}), \
+         patch('face_recognition_core.face_encodings', return_value=[list(range(128))]), \
+         patch('face_recognition_core.load_image_file', return_value="image data"):
+        result = search_for_similar_image(Image.new("RGB", (100, 100)))
+        assert result[0] is True
+        assert result[1] == "Match found. File ID: 12345"
+        
